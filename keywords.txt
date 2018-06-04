@@ -1,0 +1,51 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+GPSInfo_t	KEYWORD1
+GPSInfo_colum_t	KEYWORD1
+GPS_MTK333X	KEYWORD1
+GPS_MTK333X_UART	KEYWORD1
+GPS_MTK333X_I2C	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+encode	KEYWORD2
+value KEYWORD2
+statusReset	KEYWORD2
+createMTKpacket	KEYWORD2
+calcCRCforMTK	KEYWORD2
+isLineFeed	KEYWORD2
+isLocationUpdate	KEYWORD2
+isTimeUpdate	KEYWORD2
+isStatusUpdate	KEYWORD2
+setMessage	KEYWORD2
+getMessage	KEYWORD2
+getResult	KEYWORD2
+date	KEYWORD2
+time	KEYWORD2
+epoch	KEYWORD2
+millisecond	KEYWORD2
+latitude	KEYWORD2
+longitude	KEYWORD2
+altitude	KEYWORD2
+speed	KEYWORD2
+course	KEYWORD2
+satellites	KEYWORD2
+dop	KEYWORD2
+millisecond	KEYWORD2
+begin	KEYWORD2
+check	KEYWORD2
+sendMTKcommand	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+MT333X_ADDR	LITERAL1
+I2C_SPEED_STANDARD	LITERAL1
+I2C_SPEED_DOUBLE	LITERAL1
+I2C_SPEED_FAST	LITERAL1
+
