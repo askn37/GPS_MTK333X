@@ -218,6 +218,7 @@ MTK3333 の INTピンを配線して使用できるのであれば、コンス�
 ```c
 #define GPS_INT_PIN 4
 
+pinMode(GPS_INT_PIN, INPUT_PULLUP)
 GPS_MTK333X_I2C GPS(GPS_INT_PIN);
 GPS.begin(I2C_SPEED_STANDARD);
 ```
