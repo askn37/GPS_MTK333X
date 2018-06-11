@@ -175,6 +175,7 @@ public :
 	using GPS_MTK333X::GPS_MTK333X;
 	using super = GPS_MTK333X;
     bool begin (long = I2C_SPEED_FAST, uint8_t = MT333X_ADDR);
+    void setClock (long speed) { _speed = speed; Wire.setClock(_speed); }
 	bool check (void);
 	bool sendMTKcommand (uint16_t, String = "");
 };
