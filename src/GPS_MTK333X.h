@@ -41,7 +41,7 @@
 #define _NMEA_RMC           0x02U
 #define _NMEA_PMTK001       0x0FU
 
-struct GPSInfo_t{
+struct GPSInfo_t {
 	bcddate_t date;
 	bcdtime_t time;
 	int32_t latitude;
@@ -164,6 +164,7 @@ public :
 //
 class GPS_MTK333X_I2C : public GPS_MTK333X {
 private :
+	long _speed = 0;
 	uint8_t _i2caddr = 0;
 	uint8_t _int = 0xFF;
 	char _buff[33];

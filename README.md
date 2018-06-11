@@ -44,13 +44,13 @@ GPS の全機能を網羅するように実装されているため、8bit系 AV
 
 2. ライブラリマネージャで読み込む
 
-  スケッチ -> ライブラリをインクルード -> .ZIP形式のライブラリをインストール...
+    スケッチ -> ライブラリをインクルード -> .ZIP形式のライブラリをインストール...
 
 3. 依存関係があるライブラリも同様に読み込む
 
-  [MultiUART](https://github.com/askn37/MultiUART) -- Software Multiple UART
+    [MultiUART](https://github.com/askn37/MultiUART) -- Software Multiple UART
 
-  [Futilities](https://github.com/askn37/Futilities) -- BCDカレンダー時刻型関数ライブラリを含む
+    [Futilities](https://github.com/askn37/Futilities) -- BCDカレンダー時刻型関数ライブラリを含む
 
 ## とっかかり
 
@@ -209,7 +209,7 @@ GPS_MTK333X_I2C GPS;
 GPS.begin(I2C_SPEED_STANDARD);
 ```
 
-### GPS\_MTK333X\_I2C (uint8_t intPin)
+### GPS\_MTK333X\_I2C (uint8\_t intPin)
 
 MTK3333 の INTピンを配線して使用できるのであれば、コンストラクタでそれを指定することもできる。
 このピンは I2Cバッファに NMEAデータが用意されると LOWになり、I2Cバッファが空であれば HIGHになる。
@@ -266,35 +266,35 @@ isLocationUpdate と isTimeUpdate の両方が更新されると真を返す。
 NMEAデータを取得したあと、フラグをリセットすることで
 新たなデータが読み取られるまでフラグを偽にしておける。
 
-### time_t epoch (void)
+### time\_t epoch (void)
 
 現在保持している時刻情報を世界協定時（UTC）の unix time epoch に変換し、time_t型で返す。
 
-### uint16_t millisecond (void)
+### uint16\_t millisecond (void)
 
 現在保持している時刻情報のミリ秒を、符号なし整数型で返す。範囲は 0〜999 である。
 
 この項目はリアルタイムの時間を表してはいない。
 PMTK220 コマンドで指定した間隔で更新される。
 
-### GPSInfo_t value (void)
+### GPSInfo\_t value (void)
 
 現在保持している以下9つの情報を、GPSInfo_t 構造体でまとめて返す。
 同時に statusReset() も実行され、フラグはリセットされる。
 
-### bcddate_t date (void)
+### bcddate\_t date (void)
 
 現在保持している時刻情報の年月日を、BCDカレンダー年月日型で返す。
 
 この項目は RMCに現れる。
 
-### bcdtime_t time (void)
+### bcdtime\_t time (void)
 
 現在保持している時刻情報の時分秒を、BCDカレンダー時分秒型で返す。
 
 この項目は すべての NMEAパケットに現れる。
 
-### int32_t latitude (void)
+### int32\_t latitude (void)
 
 現在保持している最新の緯度を、符号付き整数型で返す。
 
@@ -303,7 +303,7 @@ PMTK220 コマンドで指定した間隔で更新される。
 
 この項目は RMCと GGAの両方に現れる。
 
-### int32_t longitude (void)
+### int32\_t longitude (void)
 
 現在保持している最新の経度を、符号付き整数型で返す。
 
@@ -312,7 +312,7 @@ PMTK220 コマンドで指定した間隔で更新される。
 
 この項目は RMCと GGAの両方に現れる。
 
-### int32_t altitude (void)
+### int32\_t altitude (void)
 
 現在保持している最新の高度を、符号付き整数で返す。
 
@@ -321,7 +321,7 @@ PMTK220 コマンドで指定した間隔で更新される。
 
 この項目は GGAに現れる。
 
-### uint32_t speed (void)
+### uint32\_t speed (void)
 
 現在保持している最新の移動速度を、符号なし整数で返す。
 
@@ -336,7 +336,7 @@ PMTK220 コマンドで指定した間隔で更新される。
 
 この項目は RMCに現れる。
 
-### uint16_t course (void)
+### uint16\_t course (void)
 
 現在保持している最新の移動方位を、符号なし整数で返す。
 
@@ -346,14 +346,14 @@ PMTK220 コマンドで指定した間隔で更新される。
 
 この項目は RMCに現れる。
 
-### uint16_t satellites (void)
+### uint16\_t satellites (void)
 
 現在軌道情報を把握して追跡している GPS/QZSS衛星の数を返す。
 MTK333Xの場合は最大64を返す可能性がある。
 
 この項目は GGAに現れる。
 
-### uint16_t dop (void)
+### uint16\_t dop (void)
 
 現在のDOP値を、符号なし整数にして返す。
 
@@ -369,7 +369,7 @@ DOP値が低いということはこの形が歪んでおり、三角測量の�
 
 この項目は GGAに現れる。
 
-### bool sendMTKcommand (uint16_t PMTKCODE, String MESSAGE = "")
+### bool sendMTKcommand (uint16\_t PMTKCODE, String MESSAGE = "")
 
 GPSデバイスに PMTK制御コマンドを送信し、1秒以内に応答があれば、その結果を真偽値で返す。
 第1引数にコマンド番号を整数で、第2引数に追加のパラメータを文字列で渡す。
@@ -398,7 +398,7 @@ GPS.sendMTKcommand(314, F(",0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"));
 本ライブラリの実装では RMCと GGAしか解釈しないので、
 PMTK314でそれら以外を有効にしても、受信バッファとリソースを無駄にするだけである。
 
-#### bool encode (const uint8_t NMEACHAR)
+#### bool encode (const uint8\_t NMEACHAR)
 
 キャラクタを1文字ずつ渡して NMEAデータを解析するメソッド。
 情報が更新されると真を返す。

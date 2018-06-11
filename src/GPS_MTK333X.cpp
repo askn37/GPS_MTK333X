@@ -389,14 +389,15 @@ bool GPS_MTK333X_UART::sendMTKcommand (uint16_t packetType, String dataField) {
 // GPS_MTK333X I2C interface class
 //
 bool GPS_MTK333X_I2C::begin (long i2cSpeed, uint8_t i2caddr) {
-    if (!_i2caddr) Wire.begin();
+    if (!_speed) Wire.begin();
     _i2caddr = i2caddr;
-    Wire.setClock(i2cSpeed);
+    _speed = i2cSpeed;
     return sendMTKcommand(0, F(""));
 }
 
 bool GPS_MTK333X_I2C::check (void) {
     if (_int != 0xFF && digitalRead(_int)) return false;
+    Wire.setClock(_speed);
     if (Wire.requestFrom(_i2caddr, 32U)) {
         uint8_t j = 0;
         for (uint32_t i = 0; i < 32U; i++) {
@@ -417,6 +418,7 @@ bool GPS_MTK333X_I2C::sendMTKcommand (uint16_t packetType, String dataField) {
     while (!check());
     String command = createMTKpacket(packetType, dataField);
     int len = command.length();
+    Wire.setClock(_speed);
     Wire.beginTransmission(_i2caddr);
     for (int i = 0; i < len; i++) {
         if (i != 0 && (i & 31) == 0) {
