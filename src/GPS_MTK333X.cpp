@@ -31,7 +31,7 @@ GPS_MTK333X::GPS_MTK333X (void) {
     _isLocUpdate =
     _isStatUpdate =
     _isGGA = false;
-    _GPSInfo = {0,0,0,0,0,0,0,0};
+    _GPSInfo = {0,0,0,0,0,0,0,0,0,0};
 }
 
 bool GPS_MTK333X::encode (const uint8_t c) {
@@ -75,6 +75,7 @@ void GPS_MTK333X::parserCommit (void) {
         if (_isRMC) {
             if (_isDate) {
                 _GPSInfo.date = t_date;
+                _isTimeUpdate = true;
             }
             if (_isTime) {
                 _GPSInfo.time = t_time;
@@ -85,10 +86,8 @@ void GPS_MTK333X::parserCommit (void) {
                 if (_isLongitude) _GPSInfo.longitude = t_lng;
                 if (_isSpeed)     _GPSInfo.speed     = t_speed;
                 if (_isCourse)    _GPSInfo.course    = t_course;
-                _isLocUpdate =
                 _isStatUpdate = true;
             }
-            _isTimeUpdate = true;
             _isRMC = 0;
         }
         if (_isGGA) {
@@ -97,8 +96,8 @@ void GPS_MTK333X::parserCommit (void) {
             if (_isAltitude)  _GPSInfo.altitude  = t_alt;
             _GPSInfo.satellites = t_sate;
             _GPSInfo.dop = t_dop;
-            _isLocUpdate = true;
             _isGGA = false;
+            _isLocUpdate = true;
         }
     }
 }
@@ -123,7 +122,7 @@ void GPS_MTK333X::parser (void) {
                     case 0x64 : {		// GNGGA
                         _sentence = _NMEA_GGA;
                         _isLatitude = _isLongitude =
-                        _isAltitude = false;
+                        _isAltitude = _isLocUpdate = false;
                         return;
                     }
                     case 0x67 :			// GPRMC
