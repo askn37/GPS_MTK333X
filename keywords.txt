@@ -37,6 +37,7 @@ satellites	KEYWORD2
 dop	KEYWORD2
 millisecond	KEYWORD2
 begin	KEYWORD2
+setClock KEYWORD2
 check	KEYWORD2
 sendMTKcommand	KEYWORD2
 
