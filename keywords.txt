@@ -13,7 +13,7 @@ GPS_MTK333X_I2C	KEYWORD1
 #######################################
 
 encode	KEYWORD2
-value KEYWORD2
+value	KEYWORD2
 statusReset	KEYWORD2
 createMTKpacket	KEYWORD2
 calcCRCforMTK	KEYWORD2
