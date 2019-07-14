@@ -35,6 +35,7 @@ GPS_MTK333X::GPS_MTK333X (void) {
 }
 
 bool GPS_MTK333X::encode (const uint8_t c) {
+    // Serial.write(c);
     switch (c) {
         case '$' : {
             _parity = _offset = _colum = _sentence = _isRMC = 0U;
@@ -105,27 +106,44 @@ void GPS_MTK333X::parserCommit (void) {
 void GPS_MTK333X::parser (void) {
     if (_sentence == 0) {
         uint16_t hd = (_nmeaBuff[0] << 8) | _nmeaBuff[1];
+        uint16_t ft = (_nmeaBuff[_offset-2] << 8) | _nmeaBuff[_offset-1];
         switch (hd) {
             case 0x504D : {				// PM****
-                hd = (_nmeaBuff[_offset-2] << 8) | _nmeaBuff[_offset-1];
-                switch (hd) {
+                switch (ft) {
                     case 0x3031 : {		// PMTK001 PMTK_ACK
                         _sentence = _NMEA_PMTK001;
                         return;
                     }
                 }
+                break;
             }
-            case 0x4750 :				// GP***
+            case 0x4750 : {				// GP***
+                switch (ft) {           // switch (_parity) {
+                    case 0x4741 : {     // case 0x7A : { 		// GPGGA
+                        _sentence = _NMEA_GGA;
+                        _isLatitude = _isLongitude =
+                        _isAltitude = _isLocUpdate = false;
+                        return;
+                    }
+                    case 0x4D43 : {     // case 0x67 : {		// GPRMC
+                        _isRMC = 0;
+                        _sentence = _NMEA_RMC;
+                        _isLatitude = _isLongitude =
+                        _isTime = _isDate = _isSpeed = _isCourse =
+                        _isStatUpdate = false;
+                        return;
+                    }
+                }
+                break;
+            }
             case 0x474E : {				// GN***
                 switch (_parity) {
-                    case 0x7A : 		// GPGGA
                     case 0x64 : {		// GNGGA
                         _sentence = _NMEA_GGA;
                         _isLatitude = _isLongitude =
                         _isAltitude = _isLocUpdate = false;
                         return;
                     }
-                    case 0x67 :			// GPRMC
                     case 0x79 : {		// GNRMC
                         _isRMC = 0;
                         _sentence = _NMEA_RMC;
@@ -135,6 +153,7 @@ void GPS_MTK333X::parser (void) {
                         return;
                     }
                 }
+                break;
             }
         }
         _sentence = -1;
@@ -148,7 +167,7 @@ void GPS_MTK333X::parser (void) {
                 // 時間
                 case 1 : {
                     uint32_t temp;
-                    if (_offset != 10) {
+                    if (_offset < 8) {
                         _sentence = -1;
                         _isGGA = false;
                         break;
@@ -160,7 +179,7 @@ void GPS_MTK333X::parser (void) {
                     }
                     t_time = temp;
                     temp = 0;
-                    for (uint8_t i = 8; i < 10; i++) {
+                    for (uint8_t i = 8; i < _offset; i++) {
                         temp *= 10;
                         temp += fromHex(_nmeaBuff[i]);
                     }
@@ -324,9 +343,10 @@ int32_t GPS_MTK333X::fromDegrees (int dec) {
     return degress;
 }
 
-// buildup MTK command packet
-String GPS_MTK333X::createMTKpacket (uint16_t packetType, String dataField) {
-    String config = "$PMTK";
+// buildup MTK/UBX command packet
+String GPS_MTK333X::createMTKpacket (String command, uint16_t packetType, String dataField) {
+    String config = "$P";
+    config += command;
     if (packetType < 100) config += '0';
     if (packetType < 10)  config += '0';
     config += packetType;
@@ -355,86 +375,5 @@ String GPS_MTK333X::calcCRCforMTK (String sentence) {
 //     }
 //     return false;
 // }
-
-//
-// GPS_MTK333X UART interface class
-//
-bool GPS_MTK333X_UART::begin (long speed) {
-    this->super::begin(speed);
-    return sendMTKcommand(0, F(""));
-}
-
-bool GPS_MTK333X_UART::check (void) {
-    while (this->super::available()) {
-        // Serial.write(this->super::peek());
-        encode(this->super::read());
-    }
-    return isLineFeed();
-}
-
-bool GPS_MTK333X_UART::sendMTKcommand (uint16_t packetType, String dataField) {
-    while (!check());
-    this->super::print(createMTKpacket(packetType, dataField));
-    // return resultMTKcommand(check, packetType);
-    setMessage(-1);
-    uint32_t ms = millis();
-    while ((millis() - ms) < 1000U) {
-        if (check() && getMessage() == packetType) return (getResult() == 3U);
-    }
-    return false;
-}
-
-//
-// GPS_MTK333X I2C interface class
-//
-bool GPS_MTK333X_I2C::begin (long i2cSpeed, uint8_t i2caddr) {
-    if (!_speed) Wire.begin();
-    _i2caddr = i2caddr;
-    _speed = i2cSpeed;
-    return sendMTKcommand(0, F(""));
-}
-
-bool GPS_MTK333X_I2C::check (void) {
-    if (_int != 0xFF && digitalRead(_int)) return false;
-    Wire.setClock(_speed);
-    if (Wire.requestFrom(_i2caddr, 32U)) {
-        uint8_t j = 0;
-        for (uint32_t i = 0; i < 32U; i++) {
-            if (Wire.available()) {
-                char c = 0x7F & Wire.read();
-                if (c > ' ') _buff[j++] = c;
-            }
-        }
-        if (j) _buff[j] = 0;
-        for (uint32_t i = 0; i < j; i++) {
-            encode(_buff[i]);
-        }
-    }
-    return isLineFeed();
-}
-
-bool GPS_MTK333X_I2C::sendMTKcommand (uint16_t packetType, String dataField) {
-    while (!check());
-    String command = createMTKpacket(packetType, dataField);
-    int len = command.length();
-    Wire.setClock(_speed);
-    Wire.beginTransmission(_i2caddr);
-    for (int i = 0; i < len; i++) {
-        if (i != 0 && (i & 31) == 0) {
-            Wire.endTransmission();
-            delayMicroseconds(1000);
-            Wire.beginTransmission(_i2caddr);
-        }
-        Wire.write(command[i]);
-    }
-    Wire.endTransmission();
-    // return resultMTKcommand(check, packetType);
-    setMessage(-1);
-    uint32_t ms = millis();
-    while ((millis() - ms) < 1000U) {
-        if (check() && getMessage() == packetType) return (getResult() == 3U);
-    }
-    return false;
-}
 
 // end of code

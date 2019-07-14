@@ -48,14 +48,13 @@ GPS の全機能を網羅するように実装されているため、8bit系 AV
 
 3. 依存関係があるライブラリも同様に読み込む
 
-    [MultiUART](https://github.com/askn37/MultiUART) -- Software Multiple UART
-
     [Futilities](https://github.com/askn37/Futilities) -- BCDカレンダー時刻型関数ライブラリを含む
 
 ## とっかかり
 
 ```c
-#include <GPS_MTK333X.h>
+#include <SoftwareSerial>
+#include <GPS_MTK333X_SoftwareSerial.h>
 
 #define CONSOLE_BAUD    9600
 #define GPS_BAUD        9600
@@ -63,7 +62,7 @@ GPS の全機能を網羅するように実装されているため、8bit系 AV
 #define GPS_TX		    6
 #define GPS_RX		    5
 
-GPS_MTK333X_UART GPS(GPS_RX, GPS_TX);
+GPS_MTK333X_SoftwareSerial GPS(GPS_RX, GPS_TX);
 
 void setup (void) {
     Serial.begin(CONSOLE_BAUD);
@@ -164,12 +163,14 @@ dop メンバーも誤差の目安ではあるものの具体的に何メート�
 
 ## コンストラクタ
 
-GPS\_MTK333X のコンストラクタには、接続インタフェースに応じて4種類がある。
+GPS\_MTK333X のコンストラクタには、接続インタフェースに応じて4種類が用意されている。
 
-### GPS\_MTK333X\_UART (uint8\_t RX\_PIN, uint8\_t TX\_PIN)
+### GPS\_MTK333X\_SoftwareSerial (uint8\_t RX\_PIN, uint8\_t TX\_PIN)
+### GPS\_MTK333X\_MultiUART (uint8\_t RX\_PIN, uint8\_t TX\_PIN)
 
-MultiUART（SoftwareSerialの代用実装）を継承してクラスオブジェクトを作成するコンストラクタ。
+SoftwareSerial または MultiUART コンストラクタでは、
 受信ピン、送信ピンの指定は必須である。
+またそれぞれに対応したライブラリを事前にインクルードしていなければならない。
 ピン番号は Arudiono で規定されたものとする。
 それぞれのピンのIO設定は直ちに行われる。
 これを用いた場合の最大ボーレートは 9600bpsである。
@@ -179,22 +180,25 @@ MultiUART（SoftwareSerialの代用実装）を継承してクラスオブジェ
 #define RX_PIN 5
 
 // もっぱらグローバルなオブジェクトとして
-GPS_MTK333X_UART GPS(RX_PIN, TX_PIN);
+#include <SoftwareSerial.h>
+GPS_MTK333X_SoftwareSerial GPS(RX_PIN, TX_PIN);
 GPS.begin(9600);
 
 // スコープから抜けると破棄されるようなオブジェクトとして
-auto GPS = new GPS_MTK333X_UART(RX_PIN, TX_PIN);
+auto GPS = new GPS_MTK333X_SoftwareSerial(RX_PIN, TX_PIN);
 GPS->begin(9600);
 ```
 
-### GPS\_MTK333X\_UART (HardwareSerial)
+### GPS\_MTK333X\_Serial (void)
+### GPS\_MTK333X\_Serial1 (void)
+### GPS\_MTK333X\_Serial2 (void)
+### GPS\_MTK333X\_Serial4 (void)
 
 HardwareSerial を用いてクラスオブジェクトを作成するコンストラクタ。
-引数には Arduino.h がすでに用意している HardwareSerial オブジェクトを指定する。
 9600bps を超えるボーレートを使用する場合は、このコンストラクタが必要である。
 
 ```c
-GPS_MTK333X_UART GPS(Serial1);
+GPS_MTK333X_Serial1 GPS(Serial1);
 GPS.begin(115200);
 ```
 
@@ -398,6 +402,25 @@ GPS.sendMTKcommand(314, F(",0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"));
 本ライブラリの実装では RMCと GGAしか解釈しないので、
 PMTK314でそれら以外を有効にしても、受信バッファとリソースを無駄にするだけである。
 
+#### bool sendUBXcommand (uint16\_t UBXCODE, String MESSAGE = "")
+
+U-blox シリーズの GPSに UBXコマンドを送信する。
+使い方は sendMTKcommand() と同様であるが、戻り値はない。（常に偽）
+
+本ライブラリは U-blox シリーズを真にサポートしているわけではないが、
+必要最小限の用途には使用に耐えうるので、利便性のためこのコマンドが用意されている。
+
+```c
+// GPS（U-blox）出力設定
+GPS.sendUBXcommand(40, F(",RMC,1,1,0,0,0,0"));
+GPS.sendUBXcommand(40, F(",GGA,1,1,0,0,0,0"));
+GPS.sendUBXcommand(40, F(",VTG,1,0,0,0,0,0"));
+GPS.sendUBXcommand(40, F(",GLL,1,0,0,0,0,0"));
+GPS.sendUBXcommand(40, F(",GSA,1,0,0,0,0,0"));
+GPS.sendUBXcommand(40, F(",VSV,1,0,0,0,0,0"));
+GPS.flush();
+```
+
 #### bool encode (const uint8\_t NMEACHAR)
 
 キャラクタを1文字ずつ渡して NMEAデータを解析するメソッド。
@@ -412,8 +435,10 @@ check() の内部使用メソッド。
 
 ## 改版履歴
 
-- 0.1.1
+- 0.1.2
+  - インタフェース別コンストラクタとヘッダファイルの整理
 
+- 0.1.1
 
 ## 使用許諾
 

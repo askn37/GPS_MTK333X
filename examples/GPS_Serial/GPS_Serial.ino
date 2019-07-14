@@ -1,6 +1,7 @@
+
 /***************
  *
- * GPS_I2C - GPS MTK333X Interface I2C sample for Arduino
+ * GPS_Serial - GPS MTK333X Interface UART sample for Arduino
  *
  * target architectures: Atmel AVR (ATmega 328P, 1284P and other)
  *
@@ -10,25 +11,30 @@
  */
 
 #include <Arduino.h>
-#include "GPS_MTK333X_I2C.h"
 
 #define CONSOLE_BAUD	9600
+#define GPS_BAUD		9600
 
 #define LED_BUILTIN     13
-#define GPS_PPS         A0      // I High GPS purse per seconds
-#define GPS_INT         A2      // I Low GPS I2C Buffer active
-#define GPS_WAKE        A3      // O Negative Sleep GPS
+#define GPS_PPS		    4
 
-// GPS_MTK333X_I2C GPS;
-GPS_MTK333X_I2C GPS(GPS_INT);   // use sensing interrupt pin
+// #include "GPS_MTK333X_Serial.h"
+// GPS_MTK333X_Serial GPS;
+
+#include "GPS_MTK333X_Serial1.h"
+GPS_MTK333X_Serial1 GPS;
+
+// #include "GPS_MTK333X_Serial2.h"
+// GPS_MTK333X_Serial2 GPS;
+
+// #include "GPS_MTK333X_Serial3.h"
+// GPS_MTK333X_Serial3 GPS;
 
 void setup (void) {
-    pinMode(GPS_INT, INPUT_PULLUP);
-
     Serial.begin(CONSOLE_BAUD);
     Serial.println(F("Startup"));
 
-    while (!GPS.begin()) {
+    while (!GPS.begin(GPS_BAUD)) {
         Serial.println(F("GPS notready"));
         delay(1000);
     }
@@ -52,17 +58,17 @@ void loop (void) {
         if (f) {
             Serial.print(gpsInfo.satellites, DEC);
             Serial.write(' ');
-            Serial.print(gpsInfo.dop * 0.01);
+            Serial.print(gpsInfo.dop / 100.0);
             Serial.write(' ');
             Serial.print(gpsInfo.latitude / 600000.0, 6);
             Serial.write(' ');
             Serial.print(gpsInfo.longitude / 600000.0, 6);
             Serial.write(' ');
-            Serial.print(gpsInfo.altitude * 0.01);
+            Serial.print(gpsInfo.altitude / 100.0);
             Serial.write(' ');
             Serial.print(gpsInfo.speed * 0.01852);
             Serial.write(' ');
-            Serial.print(gpsInfo.course * 0.01);
+            Serial.print(gpsInfo.course / 100.0);
             Serial.write(' ');
         }
         Serial.println();

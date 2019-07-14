@@ -5,7 +5,12 @@
 GPSInfo_t	KEYWORD1
 GPSInfo_colum_t	KEYWORD1
 GPS_MTK333X	KEYWORD1
-GPS_MTK333X_UART	KEYWORD1
+GPS_MTK333X_MultiUART	KEYWORD1
+GPS_MTK333X_SoftwareSerial	KEYWORD1
+GPS_MTK333X_Serial	KEYWORD1
+GPS_MTK333X_Serial1	KEYWORD1
+GPS_MTK333X_Serial2	KEYWORD1
+GPS_MTK333X_Serial3	KEYWORD1
 GPS_MTK333X_I2C	KEYWORD1
 
 #######################################
@@ -40,6 +45,7 @@ begin	KEYWORD2
 setClock KEYWORD2
 check	KEYWORD2
 sendMTKcommand	KEYWORD2
+sendUBXcommand	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

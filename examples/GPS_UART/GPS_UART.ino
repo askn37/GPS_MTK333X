@@ -10,7 +10,6 @@
  */
 
 #include <Arduino.h>
-#include "GPS_MTK333X.h"
 
 #define CONSOLE_BAUD	9600
 #define GPS_BAUD		9600
@@ -20,7 +19,13 @@
 #define GPS_RX		    5
 #define GPS_PPS		    4
 
-GPS_MTK333X_UART GPS(GPS_RX, GPS_TX);
+#include <SoftwareSerial.h>
+#include "GPS_MTK333X_SoftwareSerial.h"
+GPS_MTK333X_SoftwareSerial GPS(GPS_RX, GPS_TX);
+
+// #include <MultiUART.h>
+// #include "GPS_MTK333X_MultiUART.h"
+// GPS_MTK333X_MultiUART GPS(GPS_RX, GPS_TX);
 
 void setup (void) {
     Serial.begin(CONSOLE_BAUD);
